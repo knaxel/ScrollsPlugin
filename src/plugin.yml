@@ -1,0 +1,12 @@
+name: Scrolls
+version: 1.2.3
+description: This is scrolls done right.
+author: Knaxel (Cole Philipp)
+main: scrolls.ScrollsPlugin
+
+commands:
+    scrolls:
+        description: The base Scrolls Command
+        aliases: [scroll,sc,scr]
+        permission: scrolls.command
+        usage: Please use '/scrolls help' if you dont know how to use the command...
