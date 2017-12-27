@@ -27,8 +27,8 @@ Basic "rarity" algorithm:
 to determine how rare each item is in comparison to the other I use a simple algorithm. The server generates two numbers each between 1 and 0. one of those numbers is multiplied to the power of a DETERMINANT value in the config. The larger to the DETERMINANT value is, the more exponential the "rarity" of each item is.(this algorithm is also used in the chaos scroll when changing items enchantments)
 
 Here's a diagram to demonstrate how it effects the plugin.
-determinant.png
 
+https://www.spigotmc.org/attachments/determinant-png.285791/
 
 expo_successrate_determinant: used for the rate of success for each scroll
 
