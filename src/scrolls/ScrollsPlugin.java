@@ -22,7 +22,8 @@ public class ScrollsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        ScrollsPlugin.lg("Hello, thank you for trying the scrolls plugin!\n----------------------------------\nLoading configuration files");
+        ScrollsPlugin.lg("Hello, thank you for trying the scrolls plugin!");
+        ScrollsPlugin.lg("Loading configuration files");
         config = new ScrollsConfig(this);
         spawnConfig = new SpawnConfig(this);
         ScrollsPlugin.lg("Creating scroll factory...");

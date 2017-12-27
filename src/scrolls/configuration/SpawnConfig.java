@@ -81,8 +81,8 @@ public class SpawnConfig extends Config {
         config.getStringList("entity_list").stream().map((name) -> EntityType.valueOf(name)).forEachOrdered((type) -> {
             scrollDroppers.add(type);
         });
+        
     }
-
     public double getScrollRate() {
         return scroll;
     }

@@ -1,13 +1,14 @@
-
 package scrolls;
 
-import scrolls.configuration.ScrollDataType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import scrolls.configuration.ScrollDataType;
 import scrolls.configuration.ScrollsConfig;
 import scrolls.maths.ScrollsUtil;
 
@@ -18,9 +19,59 @@ import scrolls.maths.ScrollsUtil;
 public class ScrollFactory {
 
     private final ScrollsConfig config;
+    private Map<Enchantment, double[][]> enchScrollData;
+    private Map<Enchantment, double[]> darkScrollData;
+    private double[][] cleanScrollData;
+    private double[][] chaosScrollData;
 
     public ScrollFactory(ScrollsConfig config) {
         this.config = config;
+        if (config.trackData()) {
+            initTrack();
+        }
+
+    }
+
+    public void purgeScrollData() {
+
+        enchScrollData.clear();
+        darkScrollData.clear();
+
+    }
+
+    public Map<Enchantment, double[][]> getEnchScrollData() {
+        return enchScrollData;
+    }
+
+    public Map<Enchantment, double[]> getDarkScrollData() {
+        return darkScrollData;
+    }
+
+    public double[][] getCleanScrollData() {
+        return cleanScrollData;
+    }
+
+    public double[][] getChaosScrollData() {
+        return chaosScrollData;
+    }
+
+    public void initTrack() {
+
+        enchScrollData = new HashMap<>();
+        for (Enchantment ench : Enchantment.values()) {
+            if (config.getScrollData(ScrollDataType.DESTROY_RISK) == 0) {
+                enchScrollData.put(ench, new double[((int) 100 / config.getScrollData(ScrollDataType.ROUND))][1]);
+            } else {
+
+            }
+        }
+        darkScrollData = new HashMap<>();
+        for (Enchantment ench : Enchantment.values()) {
+            darkScrollData.put(ench, new double[((int) 100 / config.getDarkScrollData(ScrollDataType.ROUND))]);
+        }
+        cleanScrollData = new double[((int) (100 / config.getCleanSlateScrollData(ScrollDataType.ROUND)))][((int) config.getCleanSlateScrollData(ScrollDataType.DESTROY_RISK) / config.getCleanSlateScrollData(ScrollDataType.ROUND))];
+        chaosScrollData = new double[((int) (100 / config.getChaosScrollData(ScrollDataType.ROUND)))][((int) config.getChaosScrollData(ScrollDataType.DESTROY_RISK) / config.getChaosScrollData(ScrollDataType.ROUND))];
+
     }
 
     //returns configuration
@@ -62,8 +113,10 @@ public class ScrollFactory {
         Enchantment chose = getRandomEnchanment();
         int level = 1 + (int) ((Math.pow(Math.random(), config.getExpoLevel()) * (chose.getMaxLevel() - 1)));
         meta.addEnchant(chose, level, true);
-        int rate = success(config.getScrollData(ScrollDataType.ROUND), config.getScrollData(ScrollDataType.SUCCESS_MAX), config.getScrollData(ScrollDataType.SUCCESS_MIN));
-        int risk = config.getScrollData(ScrollDataType.DESTROY_RISK);
+        int rate = success(config.getScrollData(ScrollDataType.ROUND),
+                config.getScrollData(ScrollDataType.SUCCESS_MAX),
+                config.getScrollData(ScrollDataType.SUCCESS_MIN));
+        int risk = config.getScrollData(ScrollDataType.DESTROY_RISK) - success(config.getScrollData(ScrollDataType.ROUND), config.getScrollData(ScrollDataType.DESTROY_RISK), 0);
         //turning our enchantments we chose into english for the scroll meta
         String dname = "";
         String roman = "";
@@ -73,8 +126,8 @@ public class ScrollFactory {
         }
         //scroll strings
         String name = config.getScrollDataAsString(ScrollDataType.NAME).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
-        String desc = config.getScrollDataAsString(ScrollDataType.DESRCIPTION).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
-        String ddesc = config.getScrollDataAsString(ScrollDataType.DESTORY_DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
+        String desc = config.getScrollDataAsString(ScrollDataType.DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
+        String ddesc = config.getScrollDataAsString(ScrollDataType.DESTROY_DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
         //applying the scroll data
         lore.add(0, "Success Rate: " + rate + " %");
         meta.setDisplayName(name);
@@ -85,6 +138,11 @@ public class ScrollFactory {
         }
         meta.setLore(lore);
         scroll.setItemMeta(meta);
+
+        if (config.trackData()) {
+            enchScrollData.get(chose)[rate / config.getScrollData(ScrollDataType.ROUND)][risk / config.getScrollData(ScrollDataType.ROUND)] += 1;
+        }
+
         return scroll;
     }
 
@@ -109,8 +167,8 @@ public class ScrollFactory {
         }
         //scroll strings
         String name = config.getDarkScrollDataAsString(ScrollDataType.NAME).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
-        String desc = config.getDarkScrollDataAsString(ScrollDataType.DESRCIPTION).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
-        String ddesc = config.getDarkScrollDataAsString(ScrollDataType.DESTORY_DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
+        String desc = config.getDarkScrollDataAsString(ScrollDataType.DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
+        String ddesc = config.getDarkScrollDataAsString(ScrollDataType.DESTROY_DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%ENCH%", dname).replace("%LVL%", roman).replace("%DESTROY%", risk + "");
         //applying the scroll data
         meta.setDisplayName(name);
         lore.add(0, "Success Rate: " + rate + " %");
@@ -121,6 +179,9 @@ public class ScrollFactory {
         }
         meta.setLore(lore);
         scroll.setItemMeta(meta);
+        if (config.trackData()) {
+            darkScrollData.get(chose)[rate / config.getDarkScrollData(ScrollDataType.ROUND)] += 1;
+        }
         return scroll;
     }
 
@@ -132,11 +193,11 @@ public class ScrollFactory {
         List<String> lore = new ArrayList<String>();
         //getting our scroll stats
         int rate = success(config.getChaosScrollData(ScrollDataType.ROUND), config.getChaosScrollData(ScrollDataType.SUCCESS_MAX), config.getChaosScrollData(ScrollDataType.SUCCESS_MIN));
-        int risk = config.getChaosScrollData(ScrollDataType.DESTROY_RISK);
+        int risk = config.getChaosScrollData(ScrollDataType.DESTROY_RISK) - success(config.getChaosScrollData(ScrollDataType.ROUND), config.getChaosScrollData(ScrollDataType.DESTROY_RISK), 0);
         //scroll strings
         String name = config.getChaosScrollDataAsString(ScrollDataType.NAME);
-        String desc = config.getChaosScrollDataAsString(ScrollDataType.DESRCIPTION).replace("%SUCCESS%", rate + "").replace("%DESTROY%", risk + "");
-        String ddesc = config.getChaosScrollDataAsString(ScrollDataType.DESTORY_DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%DESTROY%", risk + "");
+        String desc = config.getChaosScrollDataAsString(ScrollDataType.DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%DESTROY%", risk + "");
+        String ddesc = config.getChaosScrollDataAsString(ScrollDataType.DESTROY_DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%DESTROY%", risk + "");
         //applying scroll data
         lore.add(0, "Success Rate: " + rate + " %");
         meta.setDisplayName(name);
@@ -147,6 +208,9 @@ public class ScrollFactory {
         }
         meta.setLore(lore);
         scroll.setItemMeta(meta);
+        if (config.trackData()) {
+            chaosScrollData[rate / config.getChaosScrollData(ScrollDataType.ROUND)][risk / config.getChaosScrollData(ScrollDataType.ROUND)] += 1;
+        }
         return scroll;
     }
 
@@ -158,11 +222,12 @@ public class ScrollFactory {
         List<String> lore = new ArrayList<String>();
         //getting our scroll stats
         int rate = success(config.getCleanSlateScrollData(ScrollDataType.ROUND), config.getCleanSlateScrollData(ScrollDataType.SUCCESS_MAX), config.getCleanSlateScrollData(ScrollDataType.SUCCESS_MIN));
-        int risk = config.getCleanSlateScrollData(ScrollDataType.DESTROY_RISK);
+
+        int risk = config.getCleanSlateScrollData(ScrollDataType.DESTROY_RISK) - success(config.getCleanSlateScrollData(ScrollDataType.ROUND), config.getCleanSlateScrollData(ScrollDataType.DESTROY_RISK), 0);
         //scroll strings
         String name = config.getCleanSlateScrollDataAsString(ScrollDataType.NAME);
-        String desc = config.getCleanSlateScrollDataAsString(ScrollDataType.DESRCIPTION).replace("%SUCCESS%", rate + "").replace("%DESTROY%", risk + "");
-        String ddesc = config.getCleanSlateScrollDataAsString(ScrollDataType.DESTORY_DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%DESTROY%", risk + "");
+        String desc = config.getCleanSlateScrollDataAsString(ScrollDataType.DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%DESTROY%", risk + "");
+        String ddesc = config.getCleanSlateScrollDataAsString(ScrollDataType.DESTROY_DESCRIPTION).replace("%SUCCESS%", rate + "").replace("%DESTROY%", risk + "");
         //applying the scroll data
         meta.setDisplayName(name);
         lore.add(0, "Success Rate: " + rate + " %");
@@ -173,6 +238,9 @@ public class ScrollFactory {
         }
         meta.setLore(lore);
         scroll.setItemMeta(meta);
+        if (config.trackData()) {
+            cleanScrollData[rate / config.getCleanSlateScrollData(ScrollDataType.ROUND)][risk / config.getCleanSlateScrollData(ScrollDataType.ROUND)] += 1;
+        }
         return scroll;
     }
 

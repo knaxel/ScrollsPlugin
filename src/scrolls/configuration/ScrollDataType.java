@@ -8,8 +8,8 @@ package scrolls.configuration;
 public enum ScrollDataType {
 
     NAME,
-    DESRCIPTION,
-    DESTORY_DESCRIPTION,
+    DESCRIPTION,
+    DESTROY_DESCRIPTION,
     MATERIAL,
     DEATH_RISK,
     DISTANCE_LIMIT,

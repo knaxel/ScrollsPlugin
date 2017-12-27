@@ -15,6 +15,7 @@ import scrolls.ScrollsPlugin;
 public class ScrollsConfig extends Config {
 
     private boolean flipRateToEnchantment; // make enchantments and level correlated to higher success rates
+    private boolean trackScrollData; // track number of which scrolls are made and how
     private double expoSuccessRates; //curve determinant for success rates
     private double expoEnchantments; //curve determinant for echantments
     private double expoLevel; //curve determinant for level
@@ -74,46 +75,49 @@ public class ScrollsConfig extends Config {
             enchantmentRarity[i] = Enchantment.getByName(ench[i]);
         }
         config.set("flip_rate&enchantment", false);
+        config.set("track_scroll_data", false);
         config.set("expo_successrate_determinant", .6);
         config.set("expo_enchantment_determinant", .6);
         config.set("expo_enchantment_level_determinant", .6);
         config.set("default_scroll_slots", 7);
         config.set("scroll.name", "Scroll of %ENCH%!");
         config.set("scroll.description", "- This scroll has a %SUCCESS% % chance to enchant the item with %ENCH% %LVL%");
-        config.set("scroll.destroydesription", "- This scroll has a %DESTROY% % chance destroy the item if failed!");
+        config.set("scroll.destroy_description", "- This scroll has a %DESTROY% % chance destroy the item if failed!");
         config.set("scroll.material", Material.PAPER.toString());
         config.set("scroll.round", 10);
-        config.set("scroll.success_rate_maximum", 100);
-        config.set("scroll.success_rate_minimum", 10);
+        config.set("scroll.success_max", 100);
+        config.set("scroll.success_min", 10);
+        config.set("scroll.destroy_risk", 0);
         config.set("cleanslatescroll.name", "Cleanslate Scroll");
         config.set("cleanslatescroll.description", "- This Cleanslate Scroll has a %SUCCESS% % chance to give the item another scroll slot.");
-        config.set("cleanslatescroll.destroydesription", "- This scroll has a %DESTROY% % chance destroy the item if failed!");
+        config.set("cleanslatescroll.destroy_description", "- This scroll has a %DESTROY% % chance destroy the item if failed!");
         config.set("cleanslatescroll.material", Material.EMPTY_MAP.toString());
         config.set("cleanslatescroll.round", 1);
-        config.set("cleanslatescroll.success_rate_maximum", 5);
-        config.set("cleanslatescroll.success_rate_minimum", 1);
+        config.set("cleanslatescroll.success_max", 5);
+        config.set("cleanslatescroll.success_min", 1);
         config.set("cleanslatescroll.destroy_risk", 20);
         config.set("darkscroll.name", "Dark Scroll of %ENCH%!");
         config.set("darkscroll.description", "- This Dark Scroll has a %SUCCESS% % chance to enchant the item with %ENCH% %LVL%");
-        config.set("darkscroll.destroydesription", "- This scroll has a %DESTROY% % chance destroy the item if failed!");
+        config.set("darkscroll.destroy_description", "- This scroll has a %DESTROY% % chance destroy the item if failed!");
         config.set("darkscroll.material", Material.MAP.toString());
         config.set("darkscroll.round", 20);
-        config.set("darkscroll.success_rate_maximum", 60);
-        config.set("darkscroll.success_rate_minimum", 20);
+        config.set("darkscroll.success_max", 60);
+        config.set("darkscroll.success_min", 20);
         config.set("darkscroll.destroy_risk", 50);
         config.set("chaosscroll.name", "Chaos Scroll");
         config.set("chaosscroll.description", "- This scroll has a %SUCCESS% % chance randomize the enchantments on the item!");
-        config.set("chaosscroll.destroydesription", "- This scroll has a %DESTROY% % chance destroy the item if failed!");
+        config.set("chaosscroll.destroy_description", "- This scroll has a %DESTROY% % chance destroy the item if failed!");
         config.set("chaosscroll.material", Material.BOOK.toString());
         config.set("chaosscroll.round", 60);
-        config.set("chaosscroll.success_rate_maximum", 60);
-        config.set("chaosscroll.success_rate_minimum", 60);
+        config.set("chaosscroll.success_max", 60);
+        config.set("chaosscroll.success_min", 60);
         config.set("chaosscroll.destroy_risk", 50);
         config.set("safetyscroll.name", "Safety Scroll");
         config.set("safetyscroll.description", "- This scroll will protect the item from being destroyed by another scroll!");
+        config.set("safetyscroll.destroy_description", "- This scroll will protect the item from being destroyed by another scroll!");
         config.set("safetyscroll.round", 100);
-        config.set("safetyscroll.success_rate_maximum", 100);
-        config.set("safetyscroll.success_rate_minimum", 100);
+        config.set("safetyscroll.success_max", 100);
+        config.set("safetyscroll.success_min", 100);
         config.set("safetyscroll.material", Material.LEATHER.toString());
         config.set("teleportscroll.material", Material.BOOK.toString());
         config.set("teleportscroll.deathrisk", 0);
@@ -123,34 +127,35 @@ public class ScrollsConfig extends Config {
 
     @Override
     void loadToPlugin() {
+        trackScrollData = config.getBoolean("track_scroll_data");
         flipRateToEnchantment = config.getBoolean("flip_rate&enchantment");
         expoSuccessRates = config.getDouble("expo_successrate_determinant");
         expoEnchantments = config.getDouble("expo_enchantment_determinant");
         expoLevel = config.getDouble("expo_enchantment_level_determinant");
         scrollSlots = config.getInt("default_scroll_slots");
         for (ScrollDataType factor : ScrollDataType.values()) {
-            if (config.contains("scroll." + factor.toString())) {
-                scrolls.put(factor, config.get("scroll." + factor.toString()));
+            if (config.contains("scroll." + factor.toString().toLowerCase())) {
+                scrolls.put(factor, config.get("scroll." + factor.toString().toLowerCase()));
             }
         }
         for (ScrollDataType factor : ScrollDataType.values()) {
-            if (config.contains("darkscroll." + factor.toString())) {
-                darkScrolls.put(factor, config.get("darkscroll." + factor.toString()));
+            if (config.contains("darkscroll." + factor.toString().toLowerCase())) {
+                darkScrolls.put(factor, config.get("darkscroll." + factor.toString().toLowerCase()));
             }
         }
         for (ScrollDataType factor : ScrollDataType.values()) {
-            if (config.contains("cleanslatescroll." + factor.toString())) {
-                cleanSlateScrolls.put(factor, config.get("cleanslatescroll." + factor.toString()));
+            if (config.contains("cleanslatescroll." + factor.toString().toLowerCase())) {
+                cleanSlateScrolls.put(factor, config.get("cleanslatescroll." + factor.toString().toLowerCase()));
             }
         }
         for (ScrollDataType factor : ScrollDataType.values()) {
-            if (config.contains("chaosscroll." + factor.toString())) {
-                chaosScrolls.put(factor, config.get("chaosscroll." + factor.toString()));
+            if (config.contains("chaosscroll." + factor.toString().toLowerCase())) {
+                chaosScrolls.put(factor, config.get("chaosscroll." + factor.toString().toLowerCase()));
             }
         }
         for (ScrollDataType factor : ScrollDataType.values()) {
-            if (config.contains("safetyscroll." + factor.toString())) {
-                safetyScrolls.put(factor, config.get("safetyscroll." + factor.toString()));
+            if (config.contains("safetyscroll." + factor.toString().toLowerCase())) {
+                safetyScrolls.put(factor, config.get("safetyscroll." + factor.toString().toLowerCase()));
             }
         }
         List<String> list = config.getStringList("enchantmentworthe");
@@ -158,12 +163,19 @@ public class ScrollsConfig extends Config {
             enchantmentRarity[i] = Enchantment.getByName(list.get(i));
         }
     }
-
+public void setTrackScrollData(boolean b){
+    if(b != trackScrollData)
+        plugin.getScrollFactory().initTrack();
+    trackScrollData = b;
+    
+}
     public void setScrollSlotLimit(int scrollLimit) {
         config.set("default_scroll_slots", scrollLimit);
         this.scrollSlots = scrollLimit;
     }
-
+    public boolean trackData(){
+        return trackScrollData;
+    }
     public boolean flipRateAndRarity() {
         return flipRateToEnchantment;
     }
