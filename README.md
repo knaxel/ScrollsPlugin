@@ -1,4 +1,6 @@
 # ScrollsPlugin
+
+(in the process of revamping the entire plugin) (too messy and just bad)
 A plugin that adds scrolls to the game spigot/bukkit
 
 
